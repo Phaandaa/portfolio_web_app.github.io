@@ -11,6 +11,7 @@ canvas.height = 640
 
 
 const boundaries = []
+const leftMuseumDoorTriggers = []
 const offset = {
     x: -840,
     y: -1700
@@ -27,8 +28,35 @@ collisionsMap.forEach((row, i) => {
     }})
 })
 
-console.log(boundaries)
+// leftMuseumDoorTrigger.forEach((row, i) => {
+//     row.forEach((symbol, j) => {
+//         if (symbol != 0) {
+//             leftMuseumDoorTriggers.push(new Boundary({position: {
+//                 x: j * Boundary.width + offset.x,
+//                 y: i * Boundary.height + offset.y        
+//             }
+//         }
+//         ))
+//     }})
+// })
 
+//Initialize default key status
+const keys = {
+    w: {
+        pressed: false
+    },
+    a: {
+        pressed: false
+    },
+    s: {
+        pressed: false
+    },
+    d: {
+        pressed: false
+    }
+}
+
+//Images Objects
 //Instantiating background image
 const image = new Image()
 image.src = './img/portfolio_exterior_2.png'
@@ -36,6 +64,10 @@ image.src = './img/portfolio_exterior_2.png'
 //Instantiating foreground image
 const foregroundImage = new Image()
 foregroundImage.src = './img/foreground_objects.png'
+
+//Instantiating night overlay
+const nightOverlayImage = new Image()
+nightOverlayImage.src = './img/night_overlay.png'
 
 //Instantiating player images
 const playerUpImage = new Image()
@@ -58,7 +90,11 @@ playerRightImage.src = './img/playerRight01.png'
 const playerRightIdleImage = new Image()
 playerRightIdleImage.src = './img/playerRightIdle01.png'
 
+//Instantiating museum door image animated
+const museumDoorLeftAnimated = new Image()
+museumDoorLeftAnimated.src = './img/museum_door_animated.png'
 
+//Sprite Objects
 //Initializing player object
 const player = new Sprite({
     position: {
@@ -78,7 +114,6 @@ const player = new Sprite({
         downIdle: playerDownIdleImage,
         leftIdle: playerLeftIdleImage,
         rightIdle: playerRightIdleImage
-
     }
 })
 
@@ -100,23 +135,17 @@ const foreground = new Sprite({
     image: foregroundImage
 })
 
-//Initialize default key status
-const keys = {
-    w: {
-        pressed: false
+const nightOverlay = new Sprite({
+    position: {
+        x: offset.x,
+        y: offset.y
     },
-    a: {
-        pressed: false
-    },
-    s: {
-        pressed: false
-    },
-    d: {
-        pressed: false
-    }
-}
+    image: nightOverlayImage
+})
 
-const movables = [background, ...boundaries, foreground]
+
+const movables = [background, ...boundaries, foreground, nightOverlay]
+const animated = []
 
 //Controls
 let lastKey = ''
@@ -204,7 +233,7 @@ function animate() {
                     rectangle1: player,
                     rectangle2: {...boundary, position: {
                         x: boundary.position.x,
-                        y: boundary.position.y + 3
+                        y: boundary.position.y + 5
                     }}
                 })
             ) {
@@ -212,10 +241,11 @@ function animate() {
                 moving = false
                 break
             }
+
         }
         if(moving)
             movables.forEach(movable => {
-            movable.position.y += 3
+            movable.position.y += 5
     })}
     else if (keys.a.pressed && lastKey === 'a') {
         player.moving = true
@@ -226,7 +256,7 @@ function animate() {
                 rectangularCollision({
                     rectangle1: player,
                     rectangle2: {...boundary, position: {
-                        x: boundary.position.x + 3,
+                        x: boundary.position.x + 5,
                         y: boundary.position.y
                     }}
                 })
@@ -238,7 +268,7 @@ function animate() {
         }
         if (moving)
             movables.forEach(movable => {
-            movable.position.x += 3
+            movable.position.x += 5
     })}
     else if (keys.s.pressed && lastKey === 's') {
         player.moving = true
@@ -250,7 +280,7 @@ function animate() {
                     rectangle1: player,
                     rectangle2: {...boundary, position: {
                         x: boundary.position.x,
-                        y: boundary.position.y - 3
+                        y: boundary.position.y - 5
                     }}
                 })
             ) {
@@ -261,7 +291,7 @@ function animate() {
         }
         if(moving)
         movables.forEach(movable => {
-        movable.position.y -= 3
+        movable.position.y -= 5
     })}
     else if (keys.d.pressed && lastKey === 'd') {
         // player.moving = true
@@ -272,7 +302,7 @@ function animate() {
                 rectangularCollision({
                     rectangle1: player,
                     rectangle2: {...boundary, position: {
-                        x: boundary.position.x - 3,
+                        x: boundary.position.x - 5,
                         y: boundary.position.y
                     }}
                 })
@@ -284,10 +314,25 @@ function animate() {
         }
         if(moving)
         movables.forEach(movable => {
-        movable.position.x -= 3
+        movable.position.x -= 5
     })}
+
+    var today = new Date()
+    if (today.getHours() > 18 || today.getHours() < 6) {
+        nightOverlay.draw()
+    }
+    
 }
 
+let keydown = false
+window.addEventListener('keydown', ()=> {
+    if (!keydown){
+        audio.Map.play()
+        keydown = true
+    }
+    
+})
 animate()
+
 
 
